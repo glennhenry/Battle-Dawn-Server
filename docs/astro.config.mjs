@@ -22,21 +22,19 @@ export default defineConfig({
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 6 },
       credits: true,
       lastUpdated: true,
-      title: "Encore", // CHANGEME
+      title: "Battle Dawn",
       components: {
         Pagination: "./src/components/Pagination.astro",
         PageFrame: "./src/components/PageFrame.astro",
       },
       editLink: {
-        // CHANGEME
-        baseUrl: "https://github.com/glennhenry/Encore/edit/main/",
+        baseUrl: "https://github.com/glennhenry/Battle-Dawn-Server/edit/main/",
       },
       social: [
         {
           icon: "github",
           label: "GitHub",
-          // CHANGEME
-          href: "https://github.com/glennhenry/Encore",
+          href: "https://github.com/glennhenry/Battle-Dawn-Server",
         },
       ],
       sidebar: [

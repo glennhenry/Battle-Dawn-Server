@@ -4,6 +4,7 @@
 deploy/
 assets/
 venue.secret.xml
+Battle Dawn.Ink
 
 .gradle
 build/
@@ -41,3 +42,4 @@ out/
 
 ### VS Code ###
 .vscode/
+/Battle Dawn.lnk

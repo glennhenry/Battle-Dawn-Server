@@ -16,12 +16,12 @@ application {
 
 ktor {
     fatJar {
-        archiveFileName.set("encore.jar")
+        archiveFileName.set("bdserver.jar")
     }
 }
 
 tasks.withType<ShadowJar> {
-    archiveFileName.set("encore.jar")
+    archiveFileName.set("bdserver.jar")
     destinationDirectory.set(file("deploy"))
     manifest {
         attributes["Main-Class"] = "ApplicationKt"
