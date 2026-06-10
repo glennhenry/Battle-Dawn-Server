@@ -58,4 +58,13 @@ there is amount 5k duplicate files and up to 85 MB save on each resources direct
 we do not delete because it will be easier to serve the game if we do not delete
 one of the notable duplicates are the map files. althohugh we can create mapping of duplciate map grid, then redirecting those files, it will waste time
 
+### Redirection
 
+1. domainUrl.php is changed to localhost
+
+```
+domain=127.0.0.1:8080&forumReg=http://127.0.0.1:8080/forum?mode=register&theme=earthMarsFantasy&packageURL=http://127.0.0.1:8080/packages&forumURL=http://127.0.0.1:8080/forum
+```
+
+2. `ClientManager.as` modified so that `AcctService` when run remotely (i.e., from website) it would load the domain + some port number which is hardcoded to `8080`.
+3. URL for music and tutorial audio is redirected to `music/Intro.mp3` and `/tutorialAudio/{world}/{audioname}` respectively.
