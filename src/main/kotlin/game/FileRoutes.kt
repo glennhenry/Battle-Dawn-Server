@@ -19,10 +19,19 @@ import java.io.File
  * Since this is simple, it doesn't use the [RouteHandler]
  */
 fun Route.fileRoutes() {
+    // website
     get("/") {
         call.respondFile(File("assets/site/index.html"))
     }
     staticFiles("site", File("assets/site"))
+
+    // game files
+    get("/client.swf") {
+        call.respondFile(File("assets/game/client.swf"))
+    }
+    get("/Intro.mp3") {
+        call.respondFile(File("assets/game/resources/Intro.mp3"))
+    }
 
     val docsDir = File("docs_build")
     if (File(docsDir, "index.html").exists()) {
