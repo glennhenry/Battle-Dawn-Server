@@ -29,8 +29,18 @@ fun Route.fileRoutes() {
     get("/client.swf") {
         call.respondFile(File("assets/game/client.swf"))
     }
-    get("/Intro.mp3") {
+    get("music/Intro.mp3") {
         call.respondFile(File("assets/game/resources/Intro.mp3"))
+    }
+    get("/tutorialAudio/{world}/{audioname}") {
+        val world = call.parameters["world"]
+            ?: return@get call.respond(HttpStatusCode.BadRequest)
+        val audioname = call.parameters["audioname"]
+            ?: return@get call.respond(HttpStatusCode.BadRequest)
+
+        val tutorialAudioDir = File("assets/game/resources/$world/tutorial/voice/$audioname")
+
+        call.respondFile(tutorialAudioDir)
     }
 
     val docsDir = File("docs_build")
