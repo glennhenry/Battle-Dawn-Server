@@ -5,6 +5,9 @@ import encore.fancam.INDENT
 import encore.fancam.Tags
 import encore.fancam.formatter.colorizeSegmentFg
 import encore.time.TimeCenter
+import encore.utils.breakIntoLines
+import encore.utils.hexString
+import encore.utils.safeAsciiString
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.PipelineCall
@@ -12,6 +15,7 @@ import io.ktor.server.plugins.origin
 import io.ktor.server.request.contentLength
 import io.ktor.server.request.contentType
 import io.ktor.server.request.httpMethod
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
 import io.ktor.server.request.uri
 import io.ktor.server.response.ApplicationSendPipeline
@@ -39,11 +43,20 @@ suspend fun ApplicationCall.stringifyHttpRequest(unhandled: Boolean): String {
 
         appendLine("$INDENT type=$type, length=$length, remote=$host")
 
-        val body = request.call.receiveText()
+        if (type.contentSubtype.contains("amf")) {
+            val bytes = request.call.receive<ByteArray>()
 
-        appendLine("$INDENT <=========body=========>")
-        appendLine("$INDENT $body")
-        append("$INDENT <=========end==========>")
+            appendLine("$INDENT <=========body=========>")
+            appendLine("$INDENT ${bytes.safeAsciiString()}")
+            appendLine("$INDENT (hex): ${bytes.hexString().breakIntoLines(60, INDENT.length + 8)}")
+            append("$INDENT <=========end==========>")
+        } else {
+            val text = request.call.receiveText()
+
+            appendLine("$INDENT <=========body=========>")
+            appendLine("$INDENT $text")
+            append("$INDENT <=========end==========>")
+        }
     }
 }
 
