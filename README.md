@@ -1,8 +1,8 @@
 # Battle Dawn Server
 
-<img src="progress.png" alt="gameplay image" width=200/>
-
 Server emulator for Battle Dawn, which was closed in 2026.
+
+<img src="progress.jpg" alt="gameplay image" width=600/>
 
 This server is not functioning yet because it's a work in progress.
 
