@@ -4,7 +4,10 @@ import encore.fancam.Fancam
 import encore.fancam.INDENT
 import io.ktor.utils.io.charsets.Charset
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
+import java.io.DataOutputStream
+import kotlin.text.Charsets
 
 /**
  * Representation of AMF request.
@@ -25,11 +28,121 @@ data class AmfMessage(
  * AMF format serializer and deserializer.
  *
  * From [wikipedia](https://en.wikipedia.org/wiki/Action_Message_Format).
- * From [wikipedia](https://blog.qdac.cc/?p=3605).
  */
 object Amf {
-    fun encore(data: Map<String, String>): ByteArray {
-        return byteArrayOf()
+    fun encode(): ByteArray {
+        val stream = ByteArrayOutputStream()
+        val output = DataOutputStream(stream)
+
+        // amf version
+        output.writeShort(3)
+
+        // header count
+        output.writeShort(0)
+
+        // message count
+        output.writeShort(1)
+
+        val targetUri = "net.battlegate.secure.AcctServices.getUserData"
+        val targetUriBytes = targetUri.toByteArray()
+
+        // target uri length
+        output.writeShort(targetUriBytes.size)
+
+        // target uri string
+        output.write(targetUriBytes)
+
+        val responseUri = "/1"
+        val responseUriBytes = responseUri.toByteArray()
+
+        // response uri length
+        output.writeShort(responseUriBytes.size)
+
+        // response uri
+        output.write(responseUriBytes)
+
+        // body length
+        output.writeInt(Int.MAX_VALUE)
+
+        // marker for object
+        output.writeByte(0x03)
+
+        val response = mapOf(
+            "success" to true,
+            "user_id" to 123,
+            "ROLES" to "",
+            "display_name" to "keplian",
+            "avatar_data" to mapOf(
+                "avatar_link" to "https://picsum.photos/50/50",
+                "avatar_width" to 50,
+                "avatar_height" to 50,
+            ),
+        )
+
+        writeAmfValue(response, output)
+
+        output.flush()
+        return stream.toByteArray()
+    }
+
+    fun writeAmfValue(value: Any?, output: DataOutputStream) {
+        when (value) {
+            is Number -> {
+                output.writeByte(NUMBER.toInt())
+                output.writeDouble(value.toDouble())
+            }
+
+            is Boolean -> {
+                output.writeByte(BOOLEAN.toInt())
+                output.writeByte(if (!value) 0x00 else 0x01)
+            }
+
+            is String -> {
+                val len = value.length
+                if (len > 65536) {
+                    // long string
+                    output.writeByte(LONG_STRING.toInt())
+                    output.writeInt(len)
+                } else {
+                    output.writeByte(STRING.toInt())
+                    output.writeShort(len)
+                }
+                output.writeBytes(value)
+            }
+
+            null -> {
+                output.writeByte(NULL.toInt())
+                output.writeByte(0x05)
+            }
+
+            is Iterable<Any?> -> {
+                output.writeByte(ECMA_ARRAY.toInt())
+                output.writeInt(value.count())
+                value.forEach { v ->
+                    writeAmfValue(v, output)
+                }
+            }
+
+            is Map<*, *> -> {
+                output.writeByte(OBJECT.toInt())
+                value.forEach { (k, v) ->
+                    require(k is String)
+                    // write key
+                    output.writeShort(k.length)
+                    output.writeBytes(k)
+
+                    // write value
+                    writeAmfValue(v, output)
+                }
+                output.writeShort(0)
+                output.writeByte(0x09)
+            }
+
+            else -> {
+                output.writeByte(OBJECT.toInt())
+                error(Unit)
+            }
+        }
     }
 
     fun decode(bytes: ByteArray): AmfRequest {
@@ -100,8 +213,21 @@ object Amf {
             }
 
             OBJECT -> {
-                Fancam.debug { "Got OBJECT (no-impl)" }
-                error(Unit)
+                val maps = mutableMapOf<String, Any?>()
+
+                var keyLen = input.readUnsignedShort()
+                while (keyLen != 0) {
+                    val key = String(input.readNBytes(keyLen), Charsets.UTF_8)
+                    val value = readAmfValue(input)
+                    maps[key] = value
+                    keyLen = input.readUnsignedShort()
+                }
+
+                if (input.readByte().toInt() != 0x09) {
+                    Fancam.warn { "end of map is not 0x09" }
+                }
+
+                maps
             }
 
             NULL -> null

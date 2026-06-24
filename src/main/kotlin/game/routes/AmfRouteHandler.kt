@@ -5,6 +5,7 @@ import encore.fancam.INDENT
 import encore.route.RouteHandler
 import encore.route.guard.NoAuthGuard
 import encore.route.handle
+import encore.utils.safeAsciiString
 import game.domain.Amf
 import game.utils.prettyPrint
 import io.ktor.http.*
@@ -26,7 +27,11 @@ class AmfRouteHandler : RouteHandler {
                     }
                 }
 
-                call.respondBytes(bytes, status = HttpStatusCode.OK)
+                val response = Amf.encode()
+
+                Fancam.debug { "Responding with: ${response.safeAsciiString()}" }
+
+                call.respondBytes(response, status = HttpStatusCode.OK)
             }
         }
     }
