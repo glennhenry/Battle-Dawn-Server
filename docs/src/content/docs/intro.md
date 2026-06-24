@@ -117,20 +117,26 @@ Specifically, the payload is amf3 but wrapped in amf0
 
 ---
 
-00 00 00 13 0A
+00 00 00 13 0A 00 00 00 01 02 00 0B 67 65 74 55 73 65 72 44 61 74 61
 
 00 00 00 13 — Body Length: 19 bytes (0x13 in decimal), payload is 19 bytes.
-0A — AMF0 Type Marker (AvmPlusObject): Switch from AMF0 to AMF3 rules.
 
----
-
-00 00 00 01 02 00 0B 67 65 74 55 73 65 72 44 61 74 61
-
-00 — AMF3 Array Header.
-00 00 01 — Element Count: only 1 element.
-02 — AMF3 Type Marker: This is a String marker.
+body:
+0A — AMF0 Type Marker: Denotes an array.
+00 00 00 01 — Element count: only 1 array element.
+02 — AMF0 Type Marker: Denotes a string.
 00 0B — String Length: Indicates the string length is 11 bytes (0x0B in decimal).
 67 65 74 55 73 65 72 44 61 74 61 — String Payload: Text string getUserData.
+
+AMF Packet
+ ├─ version
+ ├─ headers
+ └─ messages
+      ├─ target URI
+      ├─ response URI
+      └─ body
+            AMF0 marker 0x0A (strict array)
+                 [ arg0, arg1, ... ]
 ```
 
 notable class:
