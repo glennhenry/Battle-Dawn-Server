@@ -13,7 +13,7 @@ import kotlin.text.Charsets
  * From [wikipedia](https://en.wikipedia.org/wiki/Action_Message_Format).
  */
 object Amf {
-    fun encode(responseUri: String, responseObject: Map<String, Any?>): ByteArray {
+    fun encode(response: AmfResponse): ByteArray {
         val stream = ByteArrayOutputStream()
         val output = DataOutputStream(stream)
 
@@ -26,7 +26,11 @@ object Amf {
         // message count
         output.writeShort(1)
 
-        val targetUri = "$responseUri/onResult"
+        val targetUri = when (response.netStatus) {
+            AmfStatus.RESULT -> "${response.uri}/onResult"
+            AmfStatus.ON_STATUS -> "${response.uri}/onStatus"
+            AmfStatus.FAULT -> "${response.uri}/onFault"
+        }
         val targetUriBytes = targetUri.toByteArray()
 
         // target uri length
@@ -44,12 +48,20 @@ object Amf {
         // response uri
         output.write(responseUriBytes)
 
+        // write the body
+        val bodyBuffer = ByteArrayOutputStream()
+        val bodyOutput = DataOutputStream(bodyBuffer)
+        writeAmfValue(response.data, bodyOutput)
+        bodyOutput.flush()
+        val bodyBytes = bodyBuffer.toByteArray()
+
         // body length
-        output.writeInt(Int.MAX_VALUE)
+        output.writeInt(bodyBytes.size)
 
-        writeAmfValue(responseObject, output)
-
+        // body
+        output.write(bodyBytes)
         output.flush()
+
         return stream.toByteArray()
     }
 
@@ -109,9 +121,27 @@ object Amf {
 
     private fun writeAmfValue(value: Any?, output: DataOutputStream) {
         when (value) {
+            null -> {
+                output.writeByte(AmfMarker.NULL.toInt())
+            }
+
             is Number -> {
                 output.writeByte(AmfMarker.NUMBER.toInt())
                 output.writeDouble(value.toDouble())
+            }
+
+            is String -> {
+                val bytes = value.toByteArray(Charsets.UTF_8)
+
+                if (bytes.size > 65535) {
+                    output.writeByte(AmfMarker.LONG_STRING.toInt())
+                    output.writeInt(bytes.size)
+                } else {
+                    output.writeByte(AmfMarker.STRING.toInt())
+                    output.writeShort(bytes.size)
+                }
+
+                output.write(bytes)
             }
 
             is Boolean -> {
@@ -119,27 +149,9 @@ object Amf {
                 output.writeByte(if (!value) 0x00 else 0x01)
             }
 
-            is String -> {
-                val len = value.length
-                if (len > 65536) {
-                    // long string
-                    output.writeByte(AmfMarker.LONG_STRING.toInt())
-                    output.writeInt(len)
-                } else {
-                    output.writeByte(AmfMarker.STRING.toInt())
-                    output.writeShort(len)
-                }
-                output.writeBytes(value)
-            }
-
-            null -> {
-                output.writeByte(AmfMarker.NULL.toInt())
-                output.writeByte(0x05)
-            }
-
-            is Iterable<Any?> -> {
-                output.writeByte(AmfMarker.ECMA_ARRAY.toInt())
-                output.writeInt(value.count())
+            is List<Any?> -> {
+                output.writeByte(AmfMarker.STRICT_ARRAY.toInt())
+                output.writeInt(value.size)
                 value.forEach { v ->
                     writeAmfValue(v, output)
                 }

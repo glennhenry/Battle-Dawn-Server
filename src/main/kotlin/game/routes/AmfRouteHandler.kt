@@ -9,6 +9,8 @@ import encore.utils.safeAsciiString
 import encore.utils.toJsonString
 import game.amf.Amf
 import game.amf.AmfMessage
+import game.amf.AmfResponse
+import game.amf.AmfStatus
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -38,18 +40,22 @@ class AmfRouteHandler : RouteHandler {
             "net.battlegate.secure.AcctServices" -> {
                 when (msg.method) {
                     "getUserData" -> {
-                        val resObject = mapOf(
-                            "success" to true,
-                            "user_id" to 123,
-                            "ROLES" to "",
-                            "display_name" to "keplian",
-                            "avatar_data" to mapOf(
-                                "avatar_link" to "https://picsum.photos/50/50",
-                                "avatar_width" to 50,
-                                "avatar_height" to 50,
-                            ),
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "user_id" to 123,
+                                "ROLES" to "",
+                                "display_name" to "keplian",
+                                "avatar_data" to mapOf(
+                                    "avatar_link" to "https://picsum.photos/50/50",
+                                    "avatar_width" to 50,
+                                    "avatar_height" to 50,
+                                )
+                            )
                         )
-                        val response = Amf.encode(msg.responseUri, resObject)
+                        val response = Amf.encode(amfResponse)
                         Fancam.debug {
                             "Responding to getUserData with: ${response.safeAsciiString()}"
                         }
