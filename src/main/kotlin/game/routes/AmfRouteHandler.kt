@@ -7,7 +7,8 @@ import encore.route.guard.NoAuthGuard
 import encore.route.handle
 import encore.utils.safeAsciiString
 import encore.utils.toJsonString
-import game.domain.Amf
+import game.amf.Amf
+import game.amf.AmfMessage
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -27,11 +28,31 @@ class AmfRouteHandler : RouteHandler {
                     }
                 }
 
-                val response = Amf.encode()
+                request.messages.forEach { handleMessage(it) }
+            }
+        }
+    }
 
-                Fancam.debug { "Responding with: ${response.safeAsciiString()}" }
+    private suspend fun RoutingContext.handleMessage(msg: AmfMessage) {
+        when (msg.service) {
+            "net.battlegate.secure.AcctServices" -> {
+                when (msg.method) {
+                    "getUserData" -> {
+                        val response = Amf.encode()
+                        Fancam.debug {
+                            "Responding to getUserData with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
 
-                call.respondBytes(response, status = HttpStatusCode.OK)
+                    else -> {
+                        Fancam.debug { "Unhandled method '${msg.method}' for service '${msg.service}'" }
+                    }
+                }
+            }
+
+            else -> {
+                Fancam.debug { "Unhandled message for '${msg.responseUri}'" }
             }
         }
     }
