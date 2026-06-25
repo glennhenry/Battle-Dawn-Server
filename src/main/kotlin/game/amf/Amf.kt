@@ -13,7 +13,7 @@ import kotlin.text.Charsets
  * From [wikipedia](https://en.wikipedia.org/wiki/Action_Message_Format).
  */
 object Amf {
-    fun encode(): ByteArray {
+    fun encode(responseUri: String, responseObject: Map<String, Any?>): ByteArray {
         val stream = ByteArrayOutputStream()
         val output = DataOutputStream(stream)
 
@@ -26,7 +26,7 @@ object Amf {
         // message count
         output.writeShort(1)
 
-        val targetUri = "net.battlegate.secure.AcctServices.getUserData"
+        val targetUri = "$responseUri/onResult"
         val targetUriBytes = targetUri.toByteArray()
 
         // target uri length
@@ -35,7 +35,7 @@ object Amf {
         // target uri string
         output.write(targetUriBytes)
 
-        val responseUri = "/1"
+        val responseUri = ""
         val responseUriBytes = responseUri.toByteArray()
 
         // response uri length
@@ -47,22 +47,7 @@ object Amf {
         // body length
         output.writeInt(Int.MAX_VALUE)
 
-        // marker for object
-        output.writeByte(0x03)
-
-        val response = mapOf(
-            "success" to true,
-            "user_id" to 123,
-            "ROLES" to "",
-            "display_name" to "keplian",
-            "avatar_data" to mapOf(
-                "avatar_link" to "https://picsum.photos/50/50",
-                "avatar_width" to 50,
-                "avatar_height" to 50,
-            ),
-        )
-
-        writeAmfValue(response, output)
+        writeAmfValue(responseObject, output)
 
         output.flush()
         return stream.toByteArray()
