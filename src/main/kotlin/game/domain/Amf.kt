@@ -1,7 +1,6 @@
 package game.domain
 
 import encore.fancam.Fancam
-import encore.fancam.INDENT
 import io.ktor.utils.io.charsets.Charset
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -14,7 +13,7 @@ import kotlin.text.Charsets
  */
 data class AmfRequest(
     val version: Int,
-    // header...
+    val headers: List<AmfHeader>,
     val messages: List<AmfMessage>
 )
 
@@ -22,6 +21,12 @@ data class AmfMessage(
     val uri: String,
     val responseId: String,
     val body: Any?
+)
+
+data class AmfHeader(
+    val name: String,
+    val mustUnderstand: Int,
+    val value: Any?
 )
 
 /**
@@ -147,38 +152,21 @@ object Amf {
 
     fun decode(bytes: ByteArray): AmfRequest {
         val messages = mutableListOf<AmfMessage>()
+        val headers = mutableListOf<AmfHeader>()
         val input = DataInputStream(ByteArrayInputStream(bytes))
 
         val amfVersion = input.readUnsignedShort()
         var headerCount = input.readUnsignedShort()
-        if (headerCount > 0) {
-            Fancam.debug { "Got headerCount: $headerCount" }
-        }
 
-        // to-do update
         while (headerCount > 0) {
-            // 2 bytes header-name-length
             val headerNameLength = input.readUnsignedShort()
-
-            // 1 bytes * header-name-length = headerNameString
             val headerNameString = input.readNBytes(headerNameLength).toString(Charset.defaultCharset())
-
-            // 1 bytes must-understand
             val mustUnderstand = input.readUnsignedByte()
-
-            // 4 bytes header-length
             val headerLength = input.readInt()
+            val header = readAmfValue(input)
 
-            // 1 bytes * header-length = header (amf0 or amf3)
-            val header = input.readNBytes(headerLength)
+            headers.add(AmfHeader(headerNameString, mustUnderstand, header))
 
-            Fancam.debug {
-                buildString {
-                    appendLine("headerNameString=$headerNameString")
-                    appendLine("$INDENT mustUnderstand=$mustUnderstand")
-                    append("$INDENT header=${header.toString(Charset.defaultCharset())}")
-                }
-            }
             headerCount -= 1
         }
 
@@ -200,7 +188,7 @@ object Amf {
             order += 1
         }
 
-        return AmfRequest(amfVersion, messages)
+        return AmfRequest(amfVersion, headers, messages)
     }
 
     private fun readAmfValue(input: DataInputStream): Any? {

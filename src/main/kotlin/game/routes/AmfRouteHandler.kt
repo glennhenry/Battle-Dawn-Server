@@ -6,8 +6,8 @@ import encore.route.RouteHandler
 import encore.route.guard.NoAuthGuard
 import encore.route.handle
 import encore.utils.safeAsciiString
+import encore.utils.toJsonString
 import game.domain.Amf
-import game.utils.prettyPrint
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -23,7 +23,7 @@ class AmfRouteHandler : RouteHandler {
                 Fancam.debug {
                     buildString {
                         appendLine("Received AMF message:")
-                        append("$INDENT ${request.prettyPrint(INDENT.length)}")
+                        append("$INDENT ${request.toJsonString(INDENT.length)}")
                     }
                 }
 
