@@ -88,7 +88,7 @@ class AmfRouteHandler : RouteHandler {
                         val languages = listOf(
                             LanguageTable.dummy()
                         )
-                        val i18n = I18NTable()
+                        val i18n = I18NTable.dummy()
 
                         val resultObject = mapOf(
                             "worldsTable" to mapOf(
@@ -103,7 +103,8 @@ class AmfRouteHandler : RouteHandler {
                             "urlFlags" to "echo", // not used anywhere
                             "extFlags" to "echo", // not used anywhere
                             "isLoggedIn" to mapOf(
-                                "success" to true
+                                // must be false if not actually logged in!
+                                "success" to false
                             )
                         )
 
@@ -199,13 +200,82 @@ data class LanguageTable(
 }
 
 // I don't know what is langA, B, C, and D
-// but each could be a dictionary between languages
+// but each is a dictionary of strings text
+// langA, langB, langC, langD could possibly be "language packs"
+// pack A maybe contains system UI, pack B maybe the game texts
+// or it could be packA for earth world, packB for fantasy world etc
+// and that the reason they are not in single data is for data optimization
+// actual usage by client:
+// dataM.getText("UI_LOGIN_ENTER_USER_AND_PASS")
 data class I18NTable(
     val langA: List<I18NData> = emptyList(),
     val langB: List<I18NData> = emptyList(),
     val langC: List<I18NData> = emptyList(),
     val langD: List<I18NData> = emptyList(),
-)
+) {
+    companion object {
+        // must manually fill data
+        // I don't know whether the original i18n table exist as an archive
+        // specifically, strings aren't client-side, and not even downloaded by client
+        // they are sent by server from a php API
+        // the question: is it ever archived?
+        // this includes every strings in the game like in-game events too
+        fun dummy(): I18NTable {
+            return I18NTable(
+                langA = listOf(
+                    I18NData(
+                        sCode = "UI_LOGIN_ENTER_USER_AND_PASS",
+                        sText = "Enter username and password",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_USERNAME",
+                        sText = "Username",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_PASSWORD",
+                        sText = "Password",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_FORGOT_PASSWORD",
+                        sText = "Forgot password?",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_LOGIN",
+                        sText = "Login",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_NEW_PLAYER",
+                        sText = "hacked!!!",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_ENTER",
+                        sText = "Enter",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_MY_WORLDS",
+                        sText = "My Worlds",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_LOGOUT",
+                        sText = "Logout",
+                    ),
+                    I18NData(
+                        sCode = "UI_NEWS_NEWS",
+                        sText = "News",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_FORUM",
+                        sText = "Forum",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_GUIDE",
+                        sText = "Guide",
+                    ),
+                )
+            )
+        }
+    }
+}
 
 // string code and string text pair
 // e.g., "helpText" to "Need help!" (in english data)
