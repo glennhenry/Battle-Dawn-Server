@@ -5,6 +5,8 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 import kotlin.text.Charsets
 
 /**
@@ -173,8 +175,24 @@ object Amf {
             }
 
             else -> {
+                // data class object
                 output.writeByte(AmfMarker.OBJECT.toInt())
-                error(Unit)
+
+                value::class.memberProperties.forEach { property ->
+                    property.isAccessible = true
+
+                    val name = property.name
+                    val fieldValue = property.getter.call(value)
+
+                    val bytes = name.toByteArray(Charsets.UTF_8)
+                    output.writeShort(bytes.size)
+                    output.write(bytes)
+
+                    writeAmfValue(fieldValue, output)
+                }
+
+                output.writeShort(0)
+                output.writeByte(0x09)
             }
         }
     }
