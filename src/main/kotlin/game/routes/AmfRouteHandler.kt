@@ -121,6 +121,29 @@ class AmfRouteHandler : RouteHandler {
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
+
+                    "getMyWorlds" -> {
+                        // args [getMyWorlds]
+                        // getMyWorlds: method
+
+                        // param1.screen=screenEvents, param1.action=newDataFromServer
+                        // param1.subData = param2 type: eventsLoaded
+
+                        val events = listOf(EventData.dummy())
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to events
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getUserData with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -191,3 +214,48 @@ data class I18NData(
     val sCode: String,
     val sText: String
 )
+
+// probably in-game notification (the [!] logo)
+data class EventData(
+    val eventID: String,
+
+    // probably system data for event
+    val bArchived: String,
+    val bNew: String,
+    val nType: Int,
+    val nCategory: Int,
+
+    val sTag: String?,   // another object
+    val sData: String?,  // subData, another object
+    val sDescription: String,
+
+    // probably data for different kind of events
+    val allianceID: String?,
+    val rulerID: String?,
+    val colonyID: String?,
+    val squadID: String?,
+
+    val nTick: Int,
+    val tsSent: Int,
+) {
+    companion object {
+        fun dummy(): EventData {
+            return EventData(
+                eventID = "event123",
+                bArchived = "0",
+                bNew = "1",
+                nType = 1,
+                nCategory = 1,
+                sTag = "tag",
+                sDescription = "This is a description",
+                allianceID = null,
+                rulerID = null,
+                colonyID = null,
+                squadID = null,
+                sData = null,
+                nTick = 1,
+                tsSent = 1,
+            )
+        }
+    }
+}
