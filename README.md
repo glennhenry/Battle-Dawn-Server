@@ -6,6 +6,8 @@ Server emulator for Battle Dawn, which was closed in 2026.
 
 This server is not functioning yet because it's a work in progress.
 
+Currently in the login screen.
+
 *This project tries to reconstruct the game server-side behavior. Client files and assets are not included. This project is not official and is not associated with the original creators.*
 
 Made with [Encore](https://github.com/glennhenry/Encore).
