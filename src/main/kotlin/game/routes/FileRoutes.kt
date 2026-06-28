@@ -42,6 +42,7 @@ fun Route.fileRoutes() {
 
         call.respondFile(tutorialAudioDir)
     }
+    staticFiles("resources", File("assets/game/resources"))
 
     val docsDir = File("docs_build")
     if (File(docsDir, "index.html").exists()) {
