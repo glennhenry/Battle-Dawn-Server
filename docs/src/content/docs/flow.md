@@ -11,3 +11,6 @@ description: Flow
 3. `com.battledawn.secure.BDUserSServices.createTemporaryAccount`
 
 However, createTemporaryAccount does not connect anywhere else.
+You can force createTemporaryAccount to world selection screen
+if you send "authenticationSuccess" to screenLogin.refreshLoginStatus
+while also calling getLoginGfx manually.
