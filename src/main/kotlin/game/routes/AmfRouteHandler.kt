@@ -50,7 +50,7 @@ class AmfRouteHandler : RouteHandler {
                             data = mapOf(
                                 "success" to true,
                                 "user_id" to 123,
-                                "ROLES" to "",
+                                "ROLES" to "TEMPORARY ACCOUNTS",
                                 "display_name" to "keplian",
                                 "avatar_data" to mapOf(
                                     "avatar_link" to "https://picsum.photos/50/50",
@@ -142,6 +142,39 @@ class AmfRouteHandler : RouteHandler {
                         val response = Amf.encode(amfResponse)
                         Fancam.debug {
                             "Responding to getUserData with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
+                }
+            }
+
+            "com.battledawn.secure.BDUserSServices" -> {
+                when (msg.method) {
+                    // very weird, createTemporaryAccount does not call anything else
+                    // once you click new player, the UI is disabled and nothing else happened
+                    // what supposed to happen is world selection is shown and you select world to enter
+                    // but createTemporaryAccount instead do something very weird,
+                    // it literally call ScreenRegister and ScreenTopLeft which doesn't exist yet
+                    // they are literally in-game screens, but why would it be called?????
+                    // they result in null error, which can be ignored, but since nothing else happened
+                    // you just stuck
+                    "createTemporaryAccount" -> {
+                        // args [createTemporaryAccount]
+                        // createTemporaryAccount: method
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to mapOf(
+                                    "pixelURL" to ""
+                                )
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to createTemporaryAccount with: ${response.safeAsciiString()}"
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
@@ -244,8 +277,12 @@ data class I18NTable(
                         sText = "Login",
                     ),
                     I18NData(
+                        sCode = "UI_LOGIN_LOGIN_ERROR",
+                        sText = "Login Error",
+                    ),
+                    I18NData(
                         sCode = "UI_LOGIN_NEW_PLAYER",
-                        sText = "hacked!!!",
+                        sText = "New player",
                     ),
                     I18NData(
                         sCode = "UI_LOGIN_ENTER",
@@ -270,6 +307,14 @@ data class I18NTable(
                     I18NData(
                         sCode = "UI_LOGIN_GUIDE",
                         sText = "Guide",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_GUIDE_THEME",
+                        sText = "Guide Theme",
+                    ),
+                    I18NData(
+                        sCode = "UI_LOGIN_GUIDE_WORLD",
+                        sText = "Guide World",
                     ),
                 )
             )

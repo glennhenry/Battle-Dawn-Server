@@ -6,7 +6,8 @@ Server emulator for Battle Dawn, which was closed in 2026.
 
 This server is not functioning yet because it's a work in progress.
 
-Currently in the login screen.
+Currently in the login screen. As of now facing issue of "New Player" button
+never progressing further. It just stuck and instead call in game screens that dont exist yet.
 
 *This project tries to reconstruct the game server-side behavior. Client files and assets are not included. This project is not official and is not associated with the original creators.*
 
