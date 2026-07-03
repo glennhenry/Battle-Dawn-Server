@@ -1,7 +1,6 @@
 package encoreTest.auth
 
 import TestMongoCollectionName
-import com.mongodb.assertions.Assertions
 import encore.account.AccountRepository
 import encore.account.AccountSubunit
 import encore.account.MongoAccountRepository
@@ -24,6 +23,8 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import testUtils.createProfile
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -62,7 +63,7 @@ class TestAuthSubunit {
         )
         collection.insertOne(account)
 
-        Assertions.assertFalse(auth.isUsernameAvailable("name").okOrThrow())
+        assertFalse(auth.isUsernameAvailable("name").okOrThrow())
         assertTrue(repo.usernameExists("name").getOrThrow())
     }
 
@@ -81,7 +82,7 @@ class TestAuthSubunit {
         val auth = AuthSubunit(accountSubunit, pcs, manager)
 
         assertTrue(auth.isUsernameAvailable("xyz").okOrThrow())
-        Assertions.assertFalse(repo.usernameExists("xyz").getOrThrow())
+        assertFalse(repo.usernameExists("xyz").getOrThrow())
     }
 
     @Test
@@ -99,8 +100,33 @@ class TestAuthSubunit {
         val auth = AuthSubunit(accountSubunit, pcs, manager)
 
         auth.register("helloworld", "kotlinktor", "helloworld@email.com")
-        Assertions.assertFalse(auth.isUsernameAvailable("helloworld").okOrThrow())
+        assertFalse(auth.isUsernameAvailable("helloworld").okOrThrow())
         assertTrue(repo.usernameExists("helloworld").getOrThrow())
+    }
+
+    @Test
+    fun `register failed because username or email is duplicate`() = runTest {
+        val mongoDb = initMongo()
+        val collection = mongoDb.getCollection<PlayerAccount>(TestMongoCollectionName.playerAccount)
+        collection.drop()
+        mongoDb.createCollection(TestMongoCollectionName.playerAccount)
+
+        val db = MongoDataStore(mongoDb, TestMongoCollectionName)
+        val manager = SessionSubunit(scope(), SystemTimeSource())
+        val repo = MongoAccountRepository(collection)
+        val accountSubunit = AccountSubunit(repo)
+        val pcs = PlayerCreationSubunit(db)
+        val auth = AuthSubunit(accountSubunit, pcs, manager)
+
+        auth.register("helloworld1", "kotlinktor", "helloworld1@email.com")
+        // duplicate username fail
+        val res1 = auth.register("helloworld1", "kotlinktor", "helloworld2@email.com")
+        assertNull(res1.okOrThrow())
+
+        auth.register("worldhello1", "kotlinktor", "worldhello1@email.com")
+        // duplicate email fail
+        val res2 = auth.register("worldhello2", "kotlinktor", "worldhello1@email.com")
+        assertNull(res2.okOrThrow())
     }
 
     @Test
@@ -155,6 +181,7 @@ class TestAuthSubunit {
             override suspend fun getPlayerIdByUsername(username: String): Result<PlayerId?> = TODO()
             override suspend fun getCredentials(username: String): Result<Credentials?> =
                 Result.failure(RuntimeException("xiaoting"))
+
             override suspend fun getProfile(playerId: PlayerId): Result<Profile?> = TODO()
             override suspend fun updatePlayerAccount(playerId: PlayerId, account: PlayerAccount): Result<Unit> = TODO()
             override suspend fun updateProfile(playerId: PlayerId, profile: Profile): Result<Unit> = TODO()
