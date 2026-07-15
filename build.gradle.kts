@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.plugin.serialization)
 }
 
-group = "dev.encore"
-version = "1.0.12"
+group = "dev.bdserver"
+version = "0.0.1"
 
 application {
     mainClass = "ApplicationKt"
