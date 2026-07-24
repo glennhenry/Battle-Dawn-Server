@@ -1,5 +1,7 @@
 package bootstrap
 
+import com.mongodb.ConnectionString
+import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import encore.fancam.Fancam
@@ -32,6 +34,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.bson.Document
+import org.bson.codecs.configuration.CodecRegistries.fromProviders
+import org.bson.codecs.configuration.CodecRegistries.fromRegistries
+import org.bson.codecs.configuration.CodecRegistry
+import org.bson.codecs.kotlinx.KotlinSerializerCodecProvider
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -59,7 +65,7 @@ import kotlin.time.Duration.Companion.seconds
 suspend fun Application.installEncore(
     module: SerializersModule = SerializersModule { },
     security: SecurityGuard
-): Pair<MongoClient, MongoDatabase> {
+): MongoDatabase {
     configureSerialization()
     configureFancam()
     configureCors()
@@ -173,13 +179,26 @@ fun errorHtml(code: Int, message: String): String {
             "</div>"
 }
 
-suspend fun configureDatabase(): Pair<MongoClient, MongoDatabase> {
-    val mongoc = MongoClient.create(Venue.encore.database.dbUrl)
+val CodecRegistry: CodecRegistry = fromRegistries(
+    MongoClientSettings.getDefaultCodecRegistry(),
+    fromProviders(
+        KotlinSerializerCodecProvider()
+    )
+)
+
+suspend fun configureDatabase(): MongoDatabase {
+    val mongoc = MongoClient.create(
+        MongoClientSettings.builder()
+            .applyConnectionString(ConnectionString(Venue.encore.database.dbUrl))
+            .codecRegistry(CodecRegistry)
+            .build()
+    )
     val testDb = mongoc.getDatabase("admin")
     val commandResult = testDb.runCommand(Document("ping", 1))
     Fancam.info(Tags.Startup) { "MongoDB connection successful: $commandResult" }
     val db = mongoc.getDatabase(Venue.encore.database.dbName)
-    return mongoc to db
+        .withCodecRegistry(CodecRegistry)
+    return db
 }
 
 fun Application.configureWebSocket() {
