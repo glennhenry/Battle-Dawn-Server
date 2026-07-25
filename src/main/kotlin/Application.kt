@@ -3,8 +3,7 @@ import encore.EncoreIdentity
 import encore.EncoreIdentity.celebrate
 import encore.backstage.BackstageRoutes
 import encore.backstage.command.ExampleCommand
-import encore.context.ServerContext
-import encore.datastore.MongoCollectionName
+import game.context.ServerContext
 import encore.definition.GameReference
 import encore.network.lifecycle.PlayerLifecycle
 import encore.network.stage.GameStage
@@ -20,6 +19,8 @@ import encore.venue.Venue
 import encore.websocket.handler.WsCommandHandler
 import game.GameIdentity
 import game.Globals
+import game.context.RealContextFactory
+import game.mongo.RuntimeMongoCollections
 import game.routes.AmfRouteHandler
 import game.routes.fileRoutes
 import io.ktor.server.application.*
@@ -48,13 +49,6 @@ fun main() {
     ) { configureApplication() }.start(wait = true)
 }
 
-val MongoCollectionName = MongoCollectionName(
-    playerAccount = "player_account",
-    playerObjects = "player_objects",
-    playerServerObjects = "player_server_objects",
-    serverObjects = "server_objects"
-)
-
 val SystemTimezone: ZoneId = ZoneId.systemDefault()
 
 /**
@@ -79,12 +73,8 @@ suspend fun Application.configureApplication() {
     val serverSubunitScope = ServerScope
 
     // create server context
-    val serverContext = createServerContext(
-        appScope = appScope,
-        serverSubunitScope = serverSubunitScope,
-        collectionName = MongoCollectionName,
-        mongoDatabase = db
-    )
+    val serverContext = RealContextFactory(RuntimeMongoCollections, db)
+        .serverContext(appScope, serverSubunitScope)
 
     // initialize GameReference and register definitions
     gameReference()

@@ -1,7 +1,7 @@
 package encore.network.transport
 
 import encore.acts.StageAct
-import encore.datastore.collection.PlayerId
+import game.mongo.collection.PlayerId
 import encore.fancam.Fancam
 import encore.fancam.INDENT
 import encore.fancam.Tags
@@ -67,6 +67,7 @@ class DefaultConnection(
             if (logOutput) {
                 onSend(this)
             }
+        } catch (_: ClosedWriteChannelException) {
         } catch (e: Exception) {
             Fancam.error(e, Tags.Socket) { "Failed to write to $this" }
             throw e

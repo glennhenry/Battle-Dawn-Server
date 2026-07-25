@@ -21,10 +21,10 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.serialization.kotlinx.protobuf.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.plugins.doublereceive.DoubleReceive
-import io.ktor.server.plugins.origin
+import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -59,14 +59,13 @@ import kotlin.time.Duration.Companion.seconds
  *               custom serializer, or sealed hierarchies. This is used for [Json]
  *               and [ProtoBuf] configuration.
  * @param security Configure API security with [SecurityGuard].
- * @return A pair of [MongoClient] and [MongoDatabase] for application usage.
+ * @return [MongoDatabase] for application usage.
  */
-@OptIn(ExperimentalSerializationApi::class)
 suspend fun Application.installEncore(
     module: SerializersModule = SerializersModule { },
     security: SecurityGuard
 ): MongoDatabase {
-    configureSerialization()
+    configureSerialization(module)
     configureFancam()
     configureCors()
     configureStatusPages()
