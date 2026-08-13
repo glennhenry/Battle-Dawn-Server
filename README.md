@@ -73,7 +73,7 @@ Various server settings can be configured from `venue.xml`. Secret version of th
 Every variables can be overriden from OS environment variables. For example, in PowerShell (Windows):
 
 ```ps1
-$env:ENCORE_DEV_MODE = "false"
+$env:ENCORE_DEVMODE = "false"
 $env:ENCORE_SERVER_PORT = "1234"
 java -jar bdserver.jar
 ```
