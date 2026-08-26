@@ -141,28 +141,9 @@ class BackstageRoutes(
                 val html = StringBuilder()
 
                 html.append("<ul>")
-
                 for (cmd in commands) {
-                    html.append("<li><b><code>${cmd.commandId}</code></b>: ${cmd.description}")
-                    html.append("<ol>")
-
-                    for (variant in cmd.variants) {
-                        html.append("<li>")
-                        html.append("<ul>")
-
-                        // Signature list
-                        for (sig in variant.signature) {
-                            html.append("<li><code>${sig.id}</code> (<code>${sig.expectedType}</code>): ${sig.description}</li>")
-                        }
-
-                        html.append("</ul>")
-                        html.append("</li>")
-                    }
-
-                    html.append("</ol>")
-                    html.append("</li>")
+                    html.append("<li><b><code>${cmd.commandId}</code></b>: ${cmd.description}</li>")
                 }
-
                 html.append("</ul>")
 
                 call.respondText(html.toString(), ContentType.Text.Html)
