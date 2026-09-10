@@ -12,7 +12,9 @@ import kotlin.text.Charsets
 /**
  * AMF format serializer and deserializer.
  *
- * From [wikipedia](https://en.wikipedia.org/wiki/Action_Message_Format).
+ * Reference:
+ * - [Wikipedia](https://en.wikipedia.org/wiki/Action_Message_Format).
+ * - [PDF](https://ossrs.io/lts/zh-cn/assets/files/amf3_spec_121207-5ec039969edc9d9b7cd53607ec3253d9.pdf).
  */
 object Amf {
     fun encode(response: AmfResponse): ByteArray {
@@ -68,7 +70,7 @@ object Amf {
     }
 
     /**
-     * No-impl: ECMA_ARRAY, XML_DOCUMENT, TYPED_OBJECT, SWITCH_TO_AMF3
+     * No-impl: ECMA_ARRAY, XML_DOCUMENT, TYPED_OBJECT
      */
     fun decode(bytes: ByteArray): AmfRequest {
         val messages = mutableListOf<AmfMessage>()
@@ -246,8 +248,193 @@ object Amf {
                 Pair(date, timezoneOffset)
             }
 
+            AmfMarker.SWITCH_TO_AMF3 -> {
+                readAmf3Value(input)
+            }
+
             else -> error("Unsupported AMF0 marker 0x${typeMarker.toString(16)}")
         }
+    }
+
+    // not implemented: XMLDOCUMENT, XML
+    private fun readAmf3Value(input: DataInputStream): Any? {
+        return when (val typeMarker = input.readByte()) {
+            Amf3Marker.UNDEFINED -> null
+            Amf3Marker.NULL -> null
+            Amf3Marker.BOOLEAN_FALSE -> false
+            Amf3Marker.BOOLEAN_TRUE -> true
+            Amf3Marker.INTEGER -> readU29(input)
+            Amf3Marker.DOUBLE -> input.readDouble()
+            Amf3Marker.STRING -> readAmf3String(input)
+            Amf3Marker.DATE -> readAmf3Date(input)
+            Amf3Marker.ARRAY -> readAmf3Array(input)
+            Amf3Marker.OBJECT -> readAmf3Object(input)
+            Amf3Marker.BYTE_ARRAY -> readAmf3ByteArray(input)
+            else -> error("Unsupported AMF3 marker 0x${typeMarker.toString(16)}")
+        }
+    }
+
+    private fun readU29(input: DataInputStream): Int {
+        var b = input.readUnsignedByte()
+
+        if (b < 0x80) {
+            return b
+        }
+
+        var value = (b and 0x7F) shl 7
+        b = input.readUnsignedByte()
+
+        if (b < 0x80) {
+            return value or b
+        }
+
+        value = (value or (b and 0x7F)) shl 7
+        b = input.readUnsignedByte()
+
+        if (b < 0x80) {
+            return value or b
+        }
+
+        value = (value or (b and 0x7F)) shl 8
+        b = input.readUnsignedByte()
+
+        return value or b
+    }
+
+    private val stringTable = mutableListOf<String>()
+
+    private fun readAmf3String(input: DataInputStream): String {
+        val header = readU29(input)
+
+        if ((header and 1) == 0) {
+            val index = header ushr 1
+            return stringTable[index]
+        }
+
+        val length = header ushr 1
+        if (length == 0) {
+            return ""
+        }
+
+        val value = String(input.readNBytes(length), Charsets.UTF_8)
+        stringTable.add(value)
+        return value
+    }
+
+    private val objectTable = mutableListOf<Map<String, Any?>>()
+
+    private fun readAmf3Object(input: DataInputStream): Map<String, Any?> {
+        val header = readU29(input)
+
+        if ((header and 1) == 0) {
+            val objectIndex = header ushr 1
+            return objectTable[objectIndex]
+        }
+
+        if ((header and 2) == 0) {
+            error("Unsupported trait reference")
+        }
+
+        val externalizable = (header and 4) != 0
+        val dynamic = (header and 8) != 0
+        val sealedCount = header ushr 4
+
+        if (externalizable) {
+            error("Unsupported externalizable objects")
+        }
+
+        val className = readAmf3String(input)
+        val result = linkedMapOf<String, Any?>()
+        result["className"] = className
+
+        val sealedNames = mutableListOf<String>()
+        repeat(sealedCount) {
+            sealedNames += readAmf3String(input)
+        }
+        repeat(sealedCount) {
+            result[sealedNames[it]] = readAmf3Value(input)
+        }
+
+        if (dynamic) {
+            while (true) {
+                val name = readAmf3String(input)
+                if (name.isEmpty()) {
+                    break
+                }
+                result[name] = readAmf3Value(input)
+            }
+        }
+
+        objectTable.add(result)
+        return result
+    }
+
+    private val dateTable = mutableListOf<Double>()
+
+    private fun readAmf3Date(input: DataInputStream): Double {
+        val header = readU29(input)
+
+        if ((header and 1) == 0) {
+            val dateIndex = header ushr 1
+            // the docs said that date instance refer to object reference table
+            // but that doesn't make sense because they are string->value and not number type
+            return dateTable[dateIndex]
+        }
+
+        val value = input.readDouble()
+        dateTable.add(value)
+        return value
+    }
+
+    // the docs also said array reference the object reference table
+    private val arrayTable = mutableListOf<List<Any?>>()
+
+    // the array can be dense (an array of values) or associative (key-value paired)
+    // the order is: dense length, associate part, dense part
+    private fun readAmf3Array(input: DataInputStream): List<Any?> {
+        val header = readU29(input)
+
+        if ((header and 1) == 0) {
+            val arrayIndex = header ushr 1
+            return arrayTable[arrayIndex]
+        }
+
+        val densePortionLength = header ushr 1
+        val result = mutableListOf<Any?>()
+
+        var name = readAmf3String(input)
+        while (name != "") {
+            val value = readAmf3Value(input)
+            result.add(name to value)
+            name = readAmf3String(input)
+        }
+
+        repeat(densePortionLength) {
+            result.add(readAmf3Value(input))
+        }
+
+        arrayTable.add(result)
+        return result
+    }
+
+    // also said as object reference table
+    private val byteArrayTable = mutableListOf<ByteArray>()
+
+    private fun readAmf3ByteArray(input: DataInputStream): ByteArray {
+        val header = readU29(input)
+
+        if ((header and 1) == 0) {
+            val byteArrayIndex = header ushr 1
+            return byteArrayTable[byteArrayIndex]
+        }
+
+        val length = header ushr 1
+        val result = ByteArray(length) {
+            input.readByte()
+        }
+
+        byteArrayTable.add(result)
+        return result
     }
 
     private fun getServiceAndMethod(uri: String): Pair<String, String> {
