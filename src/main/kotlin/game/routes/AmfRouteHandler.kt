@@ -482,6 +482,8 @@ data class EventData(
     }
 }
 
+// many of the settings should be changed based on world being entered
+// this fixed the settings into the earth world
 data class SettingsTable(
     // setting name & setting value
     // referenced directly by client with dataM.getSettings
@@ -529,11 +531,15 @@ data class SettingsTable(
                 ),
                 SettingsTable(
                     sName = "URL_THEME",
-                    sValue = "earth/" // should be changed dynamically based on world
+                    sValue = "earth/"
                 ),
                 SettingsTable(
                     sName = "URL_CLIENT",
                     sValue = ""
+                ),
+                SettingsTable(
+                    sName = "URL_TERRAIN_SWF",
+                    sValue = "terrainmap.swf"
                 )
             )
         }
