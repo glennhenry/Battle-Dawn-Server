@@ -167,6 +167,34 @@ class AmfRouteHandler : RouteHandler {
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
+
+                    "getAllTablesNoColony" -> {
+                        // args []
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to mapOf(
+                                    "globalSettingsTable" to mapOf(
+                                        "result" to GlobalSettingsTable.dummy()
+                                    ),
+                                    "flagsTable" to mapOf(
+                                        "result" to FlagsTable.dummy()
+                                    ),
+                                    "tutorialsTable" to mapOf(
+                                        "result" to TutorialsTable.dummy()
+                                    ),
+                                )
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getAllTablesNoColony with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -425,6 +453,81 @@ data class EventData(
                 sData = null,
                 nTick = 1,
                 tsSent = 1,
+            )
+        }
+    }
+}
+
+data class GlobalSettingsTable(
+    // setting name & setting value
+    // referenced directly by client with dataM.getSettings
+    val sName: String,
+    val sValue: String,
+) {
+    companion object {
+        fun dummy(): List<GlobalSettingsTable> {
+            return listOf(
+                GlobalSettingsTable(
+                    sName = "SERVER_TOKENS_DISCOUNT",
+                    sValue = "50"
+                ),
+                GlobalSettingsTable(
+                    sName = "TUTORIAL_VERSION",
+                    sValue = "1"
+                )
+            )
+        }
+    }
+}
+
+data class FlagsTable(
+    val flagID: String,
+    val sISO: String, // probably assets path to flag icon
+) {
+    companion object {
+        fun dummy(): List<FlagsTable> {
+            return listOf(
+                FlagsTable(
+                    flagID = "US",
+                    sISO = "787"
+                ),
+                FlagsTable(
+                    flagID = "JP",
+                    sISO = "799"
+                )
+            )
+        }
+    }
+}
+
+// probably need video reference to fill this
+data class TutorialsTable(
+    val tutorialID: Int, // client show an access tutorialsTable[9999]
+    val sImg: String, // sprite image? reference to setting 'IMG_EXTENSION_TUTORIAL'
+    val nBonusM: Int, // bonus metal
+    val nBonusO: Int, // bonus oil
+    val nBonusE: Int, // bonus energy
+    val nBonusP: Int, // bonus population
+) {
+    companion object {
+        fun dummy(): List<TutorialsTable> {
+            return listOf(
+                TutorialsTable(
+                    tutorialID = 1,
+                    sImg = "",
+                    nBonusM = 123,
+                    nBonusO = 234,
+                    nBonusE = 345,
+                    nBonusP = 456
+                ),
+                TutorialsTable(
+                    tutorialID = 2,
+                    sImg = "xxx",
+                    nBonusM = 111,
+                    nBonusO = 222,
+                    nBonusE = 333,
+                    nBonusP = 444
+                ),
             )
         }
     }
