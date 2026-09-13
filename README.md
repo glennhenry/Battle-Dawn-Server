@@ -9,13 +9,12 @@ This server is not functioning yet because it's a work in progress.
 Currently in the login screen. As of now facing issue of "New Player" button
 never progressing further. It just stuck and instead call in game screens that dont exist yet.
 
-We can force the client to progress by editing some code
+We can force the client to progress by editing some code on RemoteManager.as
 
 ```as3
 case "createTemporaryAccount":
    this.dataM.temporaryAccount = false;
    this.getLoginGfx(); +++
-   this.screensM.screenLogin.refreshLoginStatus("authenticationSuccess"); +++
    this.screensM.newDataFromServer("screenRegister",{"type":"registrationSuccess"});
    this.screensM.newDataFromServer("screenTopLeft",{"type":"registrationSuccess"});
    if(param1["result"]["pixelURL"] != "")
