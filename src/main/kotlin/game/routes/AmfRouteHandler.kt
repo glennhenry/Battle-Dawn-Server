@@ -12,6 +12,7 @@ import game.amf.AmfMessage
 import game.amf.AmfResponse
 import game.amf.AmfStatus
 import game.amf.asDouble
+import game.domain.others.StringsTable
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -89,7 +90,7 @@ class AmfRouteHandler : RouteHandler {
                         val languages = listOf(
                             LanguageTable.dummy()
                         )
-                        val i18n = I18NTable.dummy()
+                        val i18n = I18NTable(langA = StringsTable.strings)
 
                         val resultObject = mapOf(
                             "worldsTable" to mapOf(
@@ -159,7 +160,8 @@ class AmfRouteHandler : RouteHandler {
                             netStatus = AmfStatus.RESULT,
                             data = mapOf(
                                 "success" to true,
-                                "result" to I18NTable.dummy()
+                                // empty table, no string extension
+                                "result" to I18NTable()
                             )
                         )
                         val response = Amf.encode(amfResponse)
@@ -429,95 +431,12 @@ data class LanguageTable(
     // "us" "gr" "il" "de" "ru" "jp" "sa" "es" "fr" "tr" "br" "pt" "ir" "cn"
 }
 
-// I don't know what is langA, B, C, and D
-// but each is a dictionary of strings text
-// langA, langB, langC, langD could possibly be "language packs"
-// pack A maybe contains system UI, pack B maybe the game texts
-// or it could be packA for earth world, packB for fantasy world etc
-// and that the reason they are not in single data is for data optimization
-// actual usage by client:
-// dataM.getText("UI_LOGIN_ENTER_USER_AND_PASS")
 data class I18NTable(
     val langA: List<I18NData> = emptyList(),
     val langB: List<I18NData> = emptyList(),
     val langC: List<I18NData> = emptyList(),
     val langD: List<I18NData> = emptyList(),
-) {
-    companion object {
-        // must manually fill data
-        // I don't know whether the original i18n table exist as an archive
-        // specifically, strings aren't client-side, and not even downloaded by client
-        // they are sent by server from a php API
-        // the question: is it ever archived?
-        // this includes every strings in the game like in-game events too
-        fun dummy(): I18NTable {
-            return I18NTable(
-                langA = listOf(
-                    I18NData(
-                        sCode = "UI_LOGIN_ENTER_USER_AND_PASS",
-                        sText = "Enter username and password",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_USERNAME",
-                        sText = "Username",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_PASSWORD",
-                        sText = "Password",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_FORGOT_PASSWORD",
-                        sText = "Forgot password?",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_LOGIN",
-                        sText = "Login",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_LOGIN_ERROR",
-                        sText = "Login Error",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_NEW_PLAYER",
-                        sText = "New player",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_ENTER",
-                        sText = "Enter",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_MY_WORLDS",
-                        sText = "My Worlds",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_LOGOUT",
-                        sText = "Logout",
-                    ),
-                    I18NData(
-                        sCode = "UI_NEWS_NEWS",
-                        sText = "News",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_FORUM",
-                        sText = "Forum",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_GUIDE",
-                        sText = "Guide",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_GUIDE_THEME",
-                        sText = "Guide Theme",
-                    ),
-                    I18NData(
-                        sCode = "UI_LOGIN_GUIDE_WORLD",
-                        sText = "Guide World",
-                    ),
-                )
-            )
-        }
-    }
-}
+)
 
 // string code and string text pair
 // e.g., "helpText" to "Need help!" (in english data)

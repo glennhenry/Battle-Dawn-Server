@@ -20,6 +20,7 @@ import encore.websocket.handler.WsCommandHandler
 import game.GameIdentity
 import game.Globals
 import game.context.RealContextFactory
+import game.domain.others.StringsTable
 import game.mongo.RuntimeMongoCollections
 import game.routes.AmfRouteHandler
 import game.routes.fileRoutes
@@ -151,6 +152,7 @@ fun gameReference() {
     GameReference.initialize {
         // add()
     }
+    StringsTable.load()
 }
 
 fun GameStageInitContext.lifecycleHooks() {
