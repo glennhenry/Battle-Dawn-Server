@@ -145,6 +145,28 @@ class AmfRouteHandler : RouteHandler {
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
+
+                    "getI18NTableNew" -> {
+                        // args [0, 1, 0, getI18NTable]
+                        // 0: languageID (must be number, supplied on flashvar, defined by LanguageTable)
+                        // 1: themeID of the selected world
+                        // 0: hardcoded number
+                        // getI18NTable: the method name
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to I18NTable.dummy()
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getI18NTableNew with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
                 }
             }
 
