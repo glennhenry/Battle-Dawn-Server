@@ -2,27 +2,11 @@
 
 Server emulator for Battle Dawn, which was closed in 2026.
 
-<img src="progress.jpg" alt="gameplay image" width=600/>
+<img src="progress.png" alt="gameplay image" width=600/>
 
 This server is not functioning yet because it's a work in progress.
 
-Currently in the login screen. As of now facing issue of "New Player" button
-never progressing further. It just stuck and instead call in game screens that dont exist yet.
-
-We can force the client to progress by editing some code on RemoteManager.as
-
-```as3
-case "createTemporaryAccount":
-   this.dataM.temporaryAccount = false;
-   this.getLoginGfx(); +++
-   this.screensM.newDataFromServer("screenRegister",{"type":"registrationSuccess"});
-   this.screensM.newDataFromServer("screenTopLeft",{"type":"registrationSuccess"});
-   if(param1["result"]["pixelURL"] != "")
-   {
-   this.screensM.loadPixelCode(param1["result"]["pixelURL"]);
-   }
-   break;
-```
+Currently we are already in the game. The next step is implementing tutorial and fixing various data.
 
 <img src="progress2.jpg" alt="gameplay image" width=600/>
 

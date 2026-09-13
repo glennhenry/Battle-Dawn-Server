@@ -284,3 +284,24 @@ resultCallback(objectResponseFromServer, args)
 ...generalResultFunctions handles each case of success/failure
 and handle based on args, then inspect the object sent from server
 ```
+
+### Client Stuck
+
+After getting into the login screen, the expected behavior for pressing the new player button is creating a temporary account and proceeding into the world selection screen. However, somehow the client is frozen without any subsequent requests.
+
+We can force the client to progress by editing some code on RemoteManager.as
+
+```as3
+case "createTemporaryAccount":
+   this.dataM.temporaryAccount = false;
+   this.getLoginGfx(); +++
+   this.screensM.newDataFromServer("screenRegister",{"type":"registrationSuccess"});
+   this.screensM.newDataFromServer("screenTopLeft",{"type":"registrationSuccess"});
+   if(param1["result"]["pixelURL"] != "")
+   {
+   this.screensM.loadPixelCode(param1["result"]["pixelURL"]);
+   }
+   break;
+```
+
+By adding `getLoginGfx` basically we forced the client to load the world selection screen SWF. This is continued further to an `authenticationSuccess` screen action and the client will progress to the world selection screen.
