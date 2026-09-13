@@ -618,32 +618,30 @@ data class FlagsTable(
 }
 
 // probably need video reference to fill this
+// some tutorial ID are not in order, like 1 -> 2 -> 4
+// don't know when 3 will happen
 data class TutorialsTable(
     val tutorialID: Int, // client show an access tutorialsTable[9999]
     val sImg: String, // sprite image? reference to setting 'IMG_EXTENSION_TUTORIAL'
-    val nBonusM: Int, // bonus metal
-    val nBonusO: Int, // bonus oil
-    val nBonusE: Int, // bonus energy
-    val nBonusP: Int, // bonus population
+    val nBonusM: Int = 0, // bonus metal
+    val nBonusO: Int = 0, // bonus oil
+    val nBonusE: Int = 0, // bonus energy
+    val nBonusP: Int = 0, // bonus population
 ) {
     companion object {
         fun dummy(): List<TutorialsTable> {
             return listOf(
                 TutorialsTable(
                     tutorialID = 1,
-                    sImg = "defaultPicture",
-                    nBonusM = 123,
-                    nBonusO = 234,
-                    nBonusE = 345,
-                    nBonusP = 456
+                    sImg = "defaultPicture"
                 ),
                 TutorialsTable(
                     tutorialID = 2,
-                    sImg = "defaultPicture",
-                    nBonusM = 111,
-                    nBonusO = 222,
-                    nBonusE = 333,
-                    nBonusP = 444
+                    sImg = "defaultPicture"
+                ),
+                TutorialsTable(
+                    tutorialID = 4,
+                    sImg = "buildColony"
                 ),
             )
         }
