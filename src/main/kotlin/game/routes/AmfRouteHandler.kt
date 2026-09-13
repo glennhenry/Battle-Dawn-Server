@@ -250,6 +250,24 @@ class AmfRouteHandler : RouteHandler {
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
+
+                    "getAllRulers" -> {
+                        // args []
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to Ruler.dummy()
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getAllRulers with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -593,6 +611,47 @@ data class TutorialsTable(
                     nBonusO = 222,
                     nBonusE = 333,
                     nBonusP = 444
+                ),
+            )
+        }
+    }
+}
+
+// ruler is the in-game ranking
+// many of the fields are not required - they are filled by client themselves
+// those are commented out
+data class Ruler(
+    val rulerID: Int, // this seems like playerID
+    val cBanned: Int = 0,
+    val sAvatar: String = "",
+//    val nRankIconNumber: Int = 0,
+    val nPower: Int = 0,
+//    val nConquers: Int = 0,
+//    val nRelics: Int = 0,
+//    val sBio: String = "",
+//    val bBioLoaded: Boolean = false,
+//    val bFacebook: Boolean = false,
+//    val medalsA: List<Medal>,
+//    val medalsB: List<Medal>,
+//    val medalsC: List<Medal>,
+//    val medalsD: List<Medal>,
+//    val showMyMedals: Boolean = true,
+//    val myMulti: Boolean = false
+) {
+    companion object {
+        fun dummy(): List<Ruler> {
+            return listOf(
+                Ruler(
+                    rulerID = 1,
+                    cBanned = 0,
+                    sAvatar = "",
+                    nPower = 123
+                ),
+                Ruler(
+                    rulerID = 2,
+                    cBanned = 0,
+                    sAvatar = "xyz",
+                    nPower = 100
                 ),
             )
         }
