@@ -498,6 +498,42 @@ data class SettingsTable(
                 SettingsTable(
                     sName = "TUTORIAL_VERSION",
                     sValue = "1"
+                ),
+                SettingsTable(
+                    sName = "TECH_ALLOW_MIL_INFANTRY",
+                    sValue = "1"
+                ),
+                SettingsTable(
+                    sName = "TECH_ALLOW_OP_OUTPOST",
+                    sValue = "1"
+                ),
+                SettingsTable(
+                    sName = "TIPS_COUNT",
+                    sValue = "0"
+                ),
+                SettingsTable(
+                    sName = "MAP_NAME",
+                    sValue = "shallowest"
+                ),
+                SettingsTable(
+                    sName = "URL_THEME_GFX",
+                    sValue = "themeGfx/themeGfx.swf"
+                ),
+                SettingsTable(
+                    sName = "URL_RESOURCES_DOMAIN",
+                    sValue = "game/"
+                ),
+                SettingsTable(
+                    sName = "URL_RESOURCES_PATH",
+                    sValue = "resources/"
+                ),
+                SettingsTable(
+                    sName = "URL_THEME",
+                    sValue = "earth/" // should be changed dynamically based on world
+                ),
+                SettingsTable(
+                    sName = "URL_CLIENT",
+                    sValue = ""
                 )
             )
         }
