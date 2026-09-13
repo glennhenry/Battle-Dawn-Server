@@ -323,6 +323,28 @@ class AmfRouteHandler : RouteHandler {
                 }
             }
 
+            "com.battledawn.insecure.BDAllianceIServices" -> {
+                when (msg.method) {
+                    "getAllAlliances" -> {
+                        // args []
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to Alliance.dummy()
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getExternalAccounts with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
+                }
+            }
+
             else -> {
                 Fancam.debug { "Unhandled message for '${msg.target}'" }
             }
@@ -645,25 +667,26 @@ data class TutorialsTable(
 }
 
 // ruler is the in-game ranking
-// many of the fields are not required - they are filled by client themselves
+// many of the fields are okay if null - they will be defaulted by client themselves
 // those are commented out
+// should fill them later
 data class Ruler(
     val rulerID: Int, // this seems like playerID
     val cBanned: Int = 0,
     val sAvatar: String = "",
-//    val nRankIconNumber: Int = 0,
+    val nRankIconNumber: Int = 0,
     val nPower: Int = 0,
-//    val nConquers: Int = 0,
-//    val nRelics: Int = 0,
-//    val sBio: String = "",
-//    val bBioLoaded: Boolean = false,
-//    val bFacebook: Boolean = false,
-//    val medalsA: List<Medal>,
-//    val medalsB: List<Medal>,
-//    val medalsC: List<Medal>,
-//    val medalsD: List<Medal>,
-//    val showMyMedals: Boolean = true,
-//    val myMulti: Boolean = false
+    val nConquers: Int = 0,
+    val nRelics: Int = 0,
+    val sBio: String = "",
+    val bBioLoaded: Boolean = false,
+    val bFacebook: Boolean = false,
+    val medalsA: List<Int> = emptyList(),
+    val medalsB: List<Int> = emptyList(),
+    val medalsC: List<Int> = emptyList(),
+    val medalsD: List<Int> = emptyList(),
+    val showMyMedals: Boolean = true,
+    val myMulti: Boolean = false
 ) {
     companion object {
         fun dummy(): List<Ruler> {
@@ -691,6 +714,28 @@ data class MyFriends(
     companion object {
         fun dummy(): MyFriends {
             return MyFriends(emptyList())
+        }
+    }
+}
+
+data class Alliance(
+    val allianceID: Int,
+    val nRelics: Int = 0,
+    val nResC: Int = 0,
+    val nMembers: Int = 0,
+    val gotAllianceRoles: Boolean = false,
+) {
+    companion object {
+        fun dummy(): List<Alliance> {
+            return listOf(
+                Alliance(
+                    allianceID = 1,
+                    nRelics = 12,
+                    nResC = 3,
+                    nMembers = 1,
+                    gotAllianceRoles = false
+                )
+            )
         }
     }
 }
