@@ -16,6 +16,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlin.Int
 
 class AmfRouteHandler : RouteHandler {
     override fun Route.install() {
@@ -338,7 +339,29 @@ class AmfRouteHandler : RouteHandler {
                         )
                         val response = Amf.encode(amfResponse)
                         Fancam.debug {
-                            "Responding to getExternalAccounts with: ${response.safeAsciiString()}"
+                            "Responding to getAllAlliances with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
+                }
+            }
+
+            "com.battledawn.insecure.BDMapIServices" -> {
+                when (msg.method) {
+                    "getColonies" -> {
+                        // args []
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to Colony.empty()
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getColonies with: ${response.safeAsciiString()}"
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
@@ -734,6 +757,43 @@ data class Alliance(
                     nResC = 3,
                     nMembers = 1,
                     gotAllianceRoles = false
+                )
+            )
+        }
+    }
+}
+
+// colony is the player's main base
+// the result of colony request means requesting every colony (i.e, player's base) that exist in the world
+data class Colony(
+    val colonyID: Int,
+    val mainColonyID: Int,
+    val rulerID: Int = -1, // if someone has conquered player's colony
+    val myColony: Boolean = false,
+    val myAllianceColony: Boolean = false,
+    val nType: Int = 0,
+    val nState: Int = 0,
+    val nXPos: Int = 0,
+    val nYPos: Int = 0,
+    val nRadarRange: Int = 1,
+    val nBattery: Int = 0,
+    val bAutoShield: Int = 0,
+    val cSpyProtect: Int = 0,
+    val nResC: Int = 0
+) {
+    companion object {
+        fun empty(): List<Colony> {
+            return listOf()
+        }
+
+        fun dummy(): List<Colony> {
+            return listOf(
+                Colony(
+                    colonyID = 1,
+                    mainColonyID = 1,
+                    rulerID = -1,
+                    nXPos = 500,
+                    nYPos = 500
                 )
             )
         }
