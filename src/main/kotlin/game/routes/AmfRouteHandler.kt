@@ -630,6 +630,19 @@ data class SettingsTable(
                 SettingsTable(
                     sName = "URL_TERRAIN_SWF",
                     sValue = "terrainmap.swf"
+                ),
+                SettingsTable(
+                    sName = "RANK_ICON_MAX",
+                    sValue = "7"
+                ),
+                SettingsTable(
+                    sName = "RANK_ICON_POWER_REQUIRED",
+                    sValue = "1"
+                ),
+                SettingsTable(
+                    // whether player is allowed to join the world
+                    sName = "SERVER_JOIN_ENABLED",
+                    sValue = "1"
                 )
             )
         }
