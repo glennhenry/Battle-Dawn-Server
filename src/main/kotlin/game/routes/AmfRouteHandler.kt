@@ -181,6 +181,29 @@ class AmfRouteHandler : RouteHandler {
                 }
             }
 
+            "com.battledawn.insecure.BDRulerIServices" -> {
+                when (msg.method) {
+                    "userHasRuler" -> {
+                        // args []
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to false
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to userHasRuler with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
+                }
+            }
+
+
             else -> {
                 Fancam.debug { "Unhandled message for '${msg.target}'" }
             }
@@ -201,7 +224,17 @@ data class WorldTable(
     companion object {
         fun dummy(): WorldTable {
             return WorldTable(
-                worldID = "planet",
+                // worldID can't be string!
+                // the game never mentions the type of dict's key
+                // and every access to the dict is normal `.worldID`
+                // but there are code somewhere comparing that with integer 17 (what's up with the number 17 anyway?)
+                // editing this to number somehow give the server a new request
+                // but by using integer, we somehow never reach the world selection screen
+                // it skips directly to world loading??
+                // it turns out that worldID numbers are hardcoded in the game's code.
+                // number >= 0 selects a world automatically (probably last visited world or server recommended)
+                // number == -1 means no world is selected yet <== USE THIS!
+                worldID = "-1",
                 nPlayers = 1,
                 nMaxCapacity = 100,
                 nTick = 1,
