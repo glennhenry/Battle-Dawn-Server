@@ -643,7 +643,36 @@ data class SettingsTable(
                     // whether player is allowed to join the world
                     sName = "SERVER_JOIN_ENABLED",
                     sValue = "1"
-                )
+                ),
+                SettingsTable(
+                    sName = "URL_MINIMAP_IMG",
+                    sValue = "minimap.jpg"
+                ),
+                SettingsTable(
+                    // this was cosmetics name
+                    sName = "SERVER_NAME",
+                    sValue = "Loona"
+                ),
+                SettingsTable(
+                    sName = "AVATAR_DEFAULT_THEME_1",
+                    sValue = Avatar().packIntoString()
+                ),
+                SettingsTable(
+                    sName = "CHAT_ENABLED",
+                    sValue = "1"
+                ),
+                SettingsTable(
+                    sName = "URL_MUSIC",
+                    sValue = "game/resources/earth/music/"
+                ),
+                SettingsTable(
+                    sName = "URL_TUTORIAL_IMG",
+                    sValue = "tutorial/screenshots/"
+                ),
+                SettingsTable(
+                    sName = "IMG_EXTENSION_TUTORIAL",
+                    sValue = ".jpg"
+                ),
             )
         }
     }
@@ -683,7 +712,7 @@ data class TutorialsTable(
             return listOf(
                 TutorialsTable(
                     tutorialID = 1,
-                    sImg = "",
+                    sImg = "defaultPicture",
                     nBonusM = 123,
                     nBonusO = 234,
                     nBonusE = 345,
@@ -691,7 +720,7 @@ data class TutorialsTable(
                 ),
                 TutorialsTable(
                     tutorialID = 2,
-                    sImg = "xxx",
+                    sImg = "defaultPicture",
                     nBonusM = 111,
                     nBonusO = 222,
                     nBonusE = 333,
@@ -810,5 +839,56 @@ data class Colony(
                 )
             )
         }
+    }
+}
+
+// avatar is sent as string data (can also be sent as avatarURL)
+// avatar had customization like the type of beret, the color
+// the type of nose, the x/y position
+data class Avatar(
+    val avatarURL: String = "",
+    val race: String = "1",
+    val gender: String = "1",
+    val beretNFrame: String = "1",
+    val beretColor: String = "1",
+    val hairNFrame: String = "1",
+    val hairColor: String = "1",
+    val eyesNFrame: String = "1",
+    val eyesColor: String = "1",
+    val eyesXPos: String = "1",
+    val eyesYPos: String = "1",
+    val eyesXStretch: String = "1",
+    val eyesYStretch: String = "1",
+    val noseNFrame: String = "1",
+    val noseColor: String = "1",
+    val noseXPos: String = "1",
+    val noseYPos: String = "1",
+    val noseXStretch: String = "1",
+    val noseYStretch: String = "1",
+    val mouthNFrame: String = "1",
+    val mouthColor: String = "1",
+    val mouthXPos: String = "1",
+    val mouthYPos: String = "1",
+    val mouthXStretch: String = "1",
+    val mouthYStretch: String = "1",
+    val beardNFrame: String = "1",
+    val beardColor: String = "1",
+    val uniformNFrame: String = "1",
+    val uniformColor: String = "1",
+    val bodyNFrame: String = "1",
+    val bodyColor: String = "1",
+    val backgroundNFrame: String = "1",
+    val backgroundColor: String = "1",
+) {
+    fun packIntoString(): String {
+        return listOf(
+            race, gender, beretNFrame, beretColor, hairNFrame,
+            hairColor, eyesNFrame, eyesColor, eyesXPos, eyesYPos,
+            eyesXStretch, eyesYStretch, noseNFrame, noseColor, noseXPos,
+            noseYPos, noseXStretch, noseYStretch, mouthNFrame, mouthColor,
+            mouthXPos, mouthYPos, mouthXStretch, mouthYStretch, beardNFrame,
+            beardColor, uniformNFrame, uniformColor, bodyNFrame, bodyColor,
+            backgroundNFrame, backgroundColor
+        ).joinToString(",")
     }
 }
