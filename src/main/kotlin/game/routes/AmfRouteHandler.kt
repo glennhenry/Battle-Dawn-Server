@@ -296,6 +296,33 @@ class AmfRouteHandler : RouteHandler {
                 }
             }
 
+            "com.battledawn.insecure.BDExternalAccountIServices" -> {
+                when (msg.method) {
+                    "getExternalAccounts" -> {
+                        // args [exampleSessionKey]
+                        // supplied via 'exSessionKey' flashvar
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                "result" to mapOf(
+                                    "externalAccounts" to MyFriends.dummy(),
+                                    // not sure; external site stuff
+                                    "myExternalSources" to emptyList<String>()
+                                )
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getExternalAccounts with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
+                }
+            }
+
             else -> {
                 Fancam.debug { "Unhandled message for '${msg.target}'" }
             }
@@ -654,6 +681,16 @@ data class Ruler(
                     nPower = 100
                 ),
             )
+        }
+    }
+}
+
+data class MyFriends(
+    val facebook: List<Int> // rulerID
+) {
+    companion object {
+        fun dummy(): MyFriends {
+            return MyFriends(emptyList())
         }
     }
 }
