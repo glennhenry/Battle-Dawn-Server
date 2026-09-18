@@ -6,9 +6,7 @@ Server emulator for Battle Dawn, which was closed in 2026.
 
 This server is not functioning yet because it's a work in progress.
 
-Currently we are already in the game. The next step is implementing tutorial and fixing various data.
-
-<img src="progress2.jpg" alt="gameplay image" width=600/>
+Currently we are already in the game and able to see the map. The next step is implementing tutorial and fixing various data.
 
 *This project tries to reconstruct the game server-side behavior. Client files and assets are not included. This project is not official and is not associated with the original creators.*
 
