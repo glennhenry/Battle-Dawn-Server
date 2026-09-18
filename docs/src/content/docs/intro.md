@@ -305,3 +305,13 @@ case "createTemporaryAccount":
 ```
 
 By adding `getLoginGfx` basically we forced the client to load the world selection screen SWF. This is continued further to an `authenticationSuccess` screen action and the client will progress to the world selection screen.
+
+### Map Loader
+
+Map loader has a potentially problematic logic when setting the endpoint.
+
+- If user is not playing from local, that is by checking that the domain is not `localhost`, use the external domain. Otherwise, use the official battledawn domain.
+- However, this doesn't check for `127.0.0.1`, so although playing from local, that is considered an external domain.
+- Moreover, the usage of domain calls the `LocalConnection.domain`, this won't return the port number. If we are operating the game via `127.0.0.1:8080`, the map endpoint will be `127.0.0.1/<...>/gateway.php`.
+
+This can be prevented by modifying the client to also check for `127.0.0.1` and add the optional port number.
