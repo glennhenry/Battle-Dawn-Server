@@ -830,19 +830,21 @@ data class Avatar(
 }
 
 data class MapSettings(
-    val nMaxZoom: Int,
-    val nBaseScale: Int,
-    val nZoomDelta: Int,
+    val nMaxZoom: Int,   // higher value -> less zoomable
+    val nBaseScale: Int, // base scale between the game screen and map image, this affects ui text position like "asia"
+    val nZoomDelta: Int, // the scale of zoom
     val sAnimation: String = "",
-    // source of the map, but unsure what is 'source' here
+    // source of the map, which is the map file
     val sSource: String = "",
 ) {
     companion object {
         fun dummy(): MapSettings {
             return MapSettings(
-                nMaxZoom = 10,
-                nBaseScale = 1,
-                nZoomDelta = 1,
+                nMaxZoom = 30,
+                // important! a low base scale hides the map because the map becomes to small
+                // 14 is the perfect value through trial and error
+                nBaseScale = 14,
+                nZoomDelta = 3,
                 sAnimation = "",
                 sSource = "http://127.0.0.1:8080/game/resources/earth/lst_3200x1600.swf"
             )
