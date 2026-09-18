@@ -367,6 +367,25 @@ class AmfRouteHandler : RouteHandler {
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
+
+                    "getMapSettings" -> {
+                        // args [lst_3200x1600]
+                        // lst_3200x1600: from settings value of MAP_NAME
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            // important: the client doesn't expect
+                            // the same structure as other response
+                            // no double result.result here
+                            data = MapSettings.dummy()
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to getMapSettings with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -524,7 +543,7 @@ data class SettingsTable(
                 ),
                 SettingsTable(
                     sName = "MAP_NAME",
-                    sValue = "shallowest"
+                    sValue = "lst_3200x1600"
                 ),
                 SettingsTable(
                     sName = "URL_THEME_GFX",
@@ -807,5 +826,26 @@ data class Avatar(
             beardColor, uniformNFrame, uniformColor, bodyNFrame, bodyColor,
             backgroundNFrame, backgroundColor
         ).joinToString(",")
+    }
+}
+
+data class MapSettings(
+    val nMaxZoom: Int,
+    val nBaseScale: Int,
+    val nZoomDelta: Int,
+    val sAnimation: String = "",
+    // source of the map, but unsure what is 'source' here
+    val sSource: String = "",
+) {
+    companion object {
+        fun dummy(): MapSettings {
+            return MapSettings(
+                nMaxZoom = 10,
+                nBaseScale = 1,
+                nZoomDelta = 1,
+                sAnimation = "",
+                sSource = "http://127.0.0.1:8080/game/resources/earth/lst_3200x1600.swf"
+            )
+        }
     }
 }
