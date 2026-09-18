@@ -11,7 +11,7 @@ package game.amf
 data class AmfResponse(
     val uri: String,
     val netStatus: AmfStatus,
-    val data: Map<String, Any?>
+    val data: Any?
 )
 
 /**
