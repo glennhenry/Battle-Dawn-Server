@@ -1,14 +1,21 @@
 # Battle Dawn Server
 
-Server emulator for Battle Dawn, which was closed in 2026.
+Server emulator for Battle Dawn, which was closed around ~June 2026.
 
-<img src="progress.png" alt="gameplay image" width=600/>
+<img src="progress.png" alt="gameplay image" width=400/>
 
-This server is not functioning yet because it's a work in progress.
+This project is intentionally abandoned. The server is left at non-functioning state. The furthest we got is entering the game and being stuck in the tutorial step 5 of building colony.
 
-Currently we are already in the game and able to see the map. The next step is implementing tutorial and fixing various data.
+<img src="progress2.png" alt="gameplay image" width=600/>
 
-*This project tries to reconstruct the game server-side behavior. Client files and assets are not included. This project is not official and is not associated with the original creators.*
+What is not working:
+
+- The client, for some reason, don't want to request the detailed map image at higher zoom level.
+- Strings text for English and international languages have to be created from scratch.
+- Need to fix a lot of server-side sent data.
+- Stuck in the tutorial.
+
+_This project tries to reconstruct the game server-side behavior. Client files and assets are not included. This project is not official and is not associated with the original creators._
 
 Made with [Encore](https://github.com/glennhenry/Encore).
 

@@ -8,6 +8,20 @@ Documentation about Battle Dawn.
 
 ![Gameplay](../../assets/battledawn.png)
 
+### Client Absurdity
+
+The `client.swf` is messed up.
+
+1. First, the code isn't decompiled nicely. You won't have stuff like `ColonyVO`, `PlayerVO` or whatever client-based class that represent data for client-side (typically also used to represent server's response). Every data is scattered around the game's code (in those "god class" 4k lines manager) I don't know whether it's an imperfect decompilation process or the game itself is compiled in obfuscated manner (or the bad developer from 2008 😅).
+2. Some code aren't decompiled perfectly. There's stuff like `NaN` and broken code in some places. These makes edit to SWF unsmooth, you probably have to rely on P-code for maximum compatibility.
+3. For some reason, the client is "stupid". There's few cases where client build its own footgun by using unavailable data. For example, calling `dataM.myProfile.mainColonyID` when profile data isn't sent yet — literally done when player is trying to build the colony. In other word, either client must be edited to remove this kind of code, added null safe guard, or force send the data before its request (doesn't make sense). Another example is `createTemporaryAccount` outside the game trying to open the `ScreenRegister` that is literally inside the game. Though, this was fixed easily by forcing client to get into world selection screen first, but it left an annoying adobe debugger error that is ignorable.
+
+Basically, the `client.swf` contains broken and some illogical logic of code. These must be fixed or updated. However, updating the SWF itself is fragile. So, the better solution long-term is converting the entire SWF back into a clean AS3 code.
+
+In other word, build a completely new AS3 project from scratch and use the decompiled code, but fix the bad code (and also rename the variables). It doesn't have to be a production-level AS3 code, but make a seamless compile-able code.
+
+After that, re-compile the SWF and use that clean SWF. This is best to make it easier to edit code in the future and add trace statements easily without breaking things up.
+
 ### Scratch Pad
 
 client.swf -> entry point of SWF if running with flash player
