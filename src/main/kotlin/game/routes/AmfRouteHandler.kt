@@ -658,6 +658,10 @@ data class SettingsTable(
                     sName = "SCAN_RADAR_RANGE",
                     sValue = "5"
                 ),
+                SettingsTable(
+                    sName = "SERVER_ADMIN_RULER_ID",
+                    sValue = "1"
+                ),
             )
         }
     }
@@ -722,14 +726,12 @@ data class TutorialsTable(
     }
 }
 
-// ruler is the in-game ranking
-// many of the fields are okay if null - they will be defaulted by client themselves
-// those are commented out
-// should fill them later
+// ruler is a representation of player in game
 data class Ruler(
     val rulerID: Int, // this seems like playerID
     val cBanned: Int = 0,
     val sAvatar: String = "",
+    val sRulerName: String, // ruler/player name
     val nRankIconNumber: Int = 0,
     val nPower: Int = 0,
     val nConquers: Int = 0,
@@ -742,7 +744,13 @@ data class Ruler(
     val medalsC: List<Int> = emptyList(),
     val medalsD: List<Int> = emptyList(),
     val showMyMedals: Boolean = true,
-    val myMulti: Boolean = false
+    val myMulti: Boolean = false,
+    val conqRulerID: Int? = null, // other player that conquered this player
+    val allianceID: Int = -1,
+    val myAlliance: Boolean = false,
+    val nAvatarSkin: Int = 1,
+    val relation: Int = 0,
+    val nOnVacation: Int = 0,
 ) {
     companion object {
         fun empty(): List<Ruler> {
@@ -753,6 +761,7 @@ data class Ruler(
             return listOf(
                 Ruler(
                     rulerID = 1,
+                    sRulerName = "rulerNameExample",
                     cBanned = 0,
                     sAvatar = Avatar().packIntoString(),
                     nPower = 123
@@ -802,14 +811,14 @@ data class MapObjects(
 // the result of colony request means requesting every colony (i.e, player's base) that exist in the world
 data class Colony(
     val colonyID: Int,
-    val mainColonyID: Int,
-    val rulerID: Int = -1, // if someone has conquered player's colony
-    val myColony: Boolean = false,
-    val myAllianceColony: Boolean = false,
+    // owner of the colony
+    val rulerID: Int,
     val nType: Int = 0,
     val nState: Int = 0,
     val nXPos: Int = 0,
     val nYPos: Int = 0,
+    val nSkin: Int = 0,
+    val sName: String = "col_name",
     val nRadarRange: Int = 1,
     val nBattery: Int = 0,
     val bAutoShield: Int = 0,
@@ -825,8 +834,7 @@ data class Colony(
             return listOf(
                 Colony(
                     colonyID = 1,
-                    mainColonyID = 1,
-                    rulerID = -1,
+                    rulerID = 1,
                     nXPos = 500,
                     nYPos = 500
                 )

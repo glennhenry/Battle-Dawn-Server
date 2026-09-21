@@ -315,3 +315,13 @@ Map loader has a potentially problematic logic when setting the endpoint.
 - Moreover, the usage of domain calls the `LocalConnection.domain`, this won't return the port number. If we are operating the game via `127.0.0.1:8080`, the map endpoint will be `127.0.0.1/<...>/gateway.php`.
 
 This can be prevented by modifying the client to also check for `127.0.0.1` and add the optional port number.
+
+### Screen Tracer
+
+If you set ruler ID on settings table of the game, by pressing (in-order) `zxcdsaqwe`, you will unlock an on-screen debug log.
+
+This is useful to add trace statement without adobe as3 trace by using:
+
+```
+screensM.screenTracer.addTrace("Trace statement...")
+```
