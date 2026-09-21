@@ -262,7 +262,7 @@ class AmfRouteHandler : RouteHandler {
                             netStatus = AmfStatus.RESULT,
                             data = mapOf(
                                 "success" to true,
-                                "result" to Ruler.dummy()
+                                "result" to Ruler.empty()
                             )
                         )
                         val response = Amf.encode(amfResponse)
@@ -566,8 +566,9 @@ data class SettingsTable(
                     sValue = ""
                 ),
                 SettingsTable(
+                    // important! terrain file have to be same size as map
                     sName = "URL_TERRAIN_SWF",
-                    sValue = "terrainmap.swf"
+                    sValue = "earth-terrain.gif"
                 ),
                 SettingsTable(
                     sName = "RANK_ICON_MAX",
@@ -714,6 +715,10 @@ data class Ruler(
     val myMulti: Boolean = false
 ) {
     companion object {
+        fun empty(): List<Ruler> {
+            return listOf()
+        }
+
         fun dummy(): List<Ruler> {
             return listOf(
                 Ruler(
@@ -870,6 +875,7 @@ data class MapSettings(
                 nBaseScale = 14,
                 nZoomDelta = 3,
                 sAnimation = "",
+                // important! terrain file have to be same size as map
                 sSource = "http://127.0.0.1:8080/game/resources/earth/lst_3200x1600.swf"
             )
         }
