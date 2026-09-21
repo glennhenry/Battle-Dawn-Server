@@ -262,12 +262,32 @@ class AmfRouteHandler : RouteHandler {
                             netStatus = AmfStatus.RESULT,
                             data = mapOf(
                                 "success" to true,
-                                "result" to Ruler.empty()
+                                "result" to Ruler.dummy()
                             )
                         )
                         val response = Amf.encode(amfResponse)
                         Fancam.debug {
                             "Responding to getAllRulers with: ${response.safeAsciiString()}"
+                        }
+                        call.respondBytes(response, status = HttpStatusCode.OK)
+                    }
+
+                    "newRulerBuildColony" -> {
+                        // args [playerName, fixed empty string, xPos, yPos]
+
+                        val amfResponse = AmfResponse(
+                            uri = msg.responseUri,
+                            netStatus = AmfStatus.RESULT,
+                            data = mapOf(
+                                "success" to true,
+                                // no result data is needed for successful response
+                                // unless if success is false, result should be error message
+                                "result" to true
+                            )
+                        )
+                        val response = Amf.encode(amfResponse)
+                        Fancam.debug {
+                            "Responding to newRulerBuildColony with: ${response.safeAsciiString()}"
                         }
                         call.respondBytes(response, status = HttpStatusCode.OK)
                     }
@@ -358,7 +378,17 @@ class AmfRouteHandler : RouteHandler {
                             netStatus = AmfStatus.RESULT,
                             data = mapOf(
                                 "success" to true,
-                                "result" to Colony.empty()
+                                // confusing usage of client
+                                // mapObjects.colonies is result of this response
+                                // however inside DataManager.setMapObjects, that is immediately overwritten
+                                // mapObjects = result of this response
+                                // so structurally, mapObjects is an object that has field 'colonies',
+                                // that field is the value of this response
+                                // next, mapObjects is overwritten with the value of this response
+                                // so essentially, this response shouldn't just be colony, but a mapObjects which has 'colonies' field aswell.
+                                "result" to MapObjects(
+                                    colonies = Colony.dummy()
+                                )
                             )
                         )
                         val response = Amf.encode(amfResponse)
@@ -724,14 +754,8 @@ data class Ruler(
                 Ruler(
                     rulerID = 1,
                     cBanned = 0,
-                    sAvatar = "",
+                    sAvatar = Avatar().packIntoString(),
                     nPower = 123
-                ),
-                Ruler(
-                    rulerID = 2,
-                    cBanned = 0,
-                    sAvatar = "xyz",
-                    nPower = 100
                 ),
             )
         }
@@ -769,6 +793,10 @@ data class Alliance(
         }
     }
 }
+
+data class MapObjects(
+    val colonies: List<Colony>
+)
 
 // colony is the player's main base
 // the result of colony request means requesting every colony (i.e, player's base) that exist in the world
