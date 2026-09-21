@@ -611,6 +611,22 @@ data class SettingsTable(
                     sName = "IMG_EXTENSION_TUTORIAL",
                     sValue = ".jpg"
                 ),
+                SettingsTable(
+                    sName = "MAP_MIN_BUILD_DISTANCE",
+                    sValue = "3"
+                ),
+                SettingsTable(
+                    sName = "SQUAD_MAX_TRAVEL_TICKS",
+                    sValue = "20"
+                ),
+                SettingsTable(
+                    sName = "SQUAD_TRAVEL_PER_TICK",
+                    sValue = "2"
+                ),
+                SettingsTable(
+                    sName = "SCAN_RADAR_RANGE",
+                    sValue = "5"
+                ),
             )
         }
     }
@@ -656,10 +672,18 @@ data class TutorialsTable(
                 ),
                 TutorialsTable(
                     tutorialID = 2,
-                    sImg = "defaultPicture"
+                    sImg = "help"
+                ),
+                TutorialsTable(
+                    tutorialID = 3,
+                    sImg = "zoom"
                 ),
                 TutorialsTable(
                     tutorialID = 4,
+                    sImg = "pan"
+                ),
+                TutorialsTable(
+                    tutorialID = 5,
                     sImg = "buildColony"
                 ),
             )
